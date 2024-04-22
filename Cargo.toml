@@ -1,0 +1,27 @@
+[package]
+name = "moobius"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+failure = "0.1.5"
+log = "0.4.6"
+serde = "1.0.94"
+serde_json = "1.0.40"
+tokio-tungstenite = "0.8.0"
+tungstenite = "0.8.1"
+url = "1.7.2"
+url_serde = "0.2.0"
+serde_derive = "1.0"
+reqwest = { version = "0.12", features = ["blocking", "json", "multipart"] }
+tokio = { version = "0.2.22", features = ["full"] }
+uuid = { version = "1.8.0", features = ["v4", "fast-rng", "macro-diagnostics"] }
+
+[dependencies.futures]
+version = "0.1.28"
+
+[dependencies.futures3]
+package = "futures-preview"
+version = "0.3.0-alpha.17"
+features = ["async-await", "nightly", "compat"]
