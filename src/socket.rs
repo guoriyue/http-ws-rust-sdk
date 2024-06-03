@@ -36,7 +36,7 @@ impl Protocol for JsonProtocol {
 pub struct WebSocket<T: Protocol> {
     protocol: T,
     sink: Pin<Box<dyn Sink<Message, Error = WsError> + Send>>,
-    stream: Pin<Box<dyn Stream<Item = Result<Message, WsError>> + Send>>,
+    stream: Pin<Box<dyn Stream<Item = Result<Message, WsError>> + Send>>
 }
 
 impl<T: Protocol> WebSocket<T> {
@@ -96,36 +96,34 @@ impl<T: Protocol> WebSocket<T> {
         Ok(message)
     }
 
-    pub async fn update_userlist(
+    pub async fn update_character_list(
         &mut self, 
-        client_id: &str, 
+        service_id: &str, 
         channel_id: &str, 
-        user_list: Vec<&str>, 
-        recipients: Vec<&str>
+        characters: &str,
+        recipients: &str
     ) -> Result<Value, Box<dyn std::error::Error>> {
-        // Ensure all items in user_list are strings (Rust's type system handles this).
-        for ul in &user_list {
-            if !ul.is_ascii() {
-                return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidInput, "User list must be a list of string ids.")));
-            }
-        }
-
         let message = json!({
             "type": "update",
             "request_id": Uuid::new_v4().to_string(),
-            "client_id": client_id,
+            "service_id": service_id,
             "body": {
-                "subtype": "update_userlist",
+                "subtype": "update_characters",
                 "channel_id": channel_id,
                 "recipients": recipients,
-                "userlist": user_list,
-                "context": {}
+                "content": {"characters": characters}
             }
         });
-
-        println!("Constructed update_userlist message: {:?}", message);
+        
         self.send(message.clone()).await?;
 
         Ok(message)
     }
+
+    pub async fn send_buttons_from_database(&mut self, channel_id: &str, character_id: &str) -> Result<Value, Box<dyn std::error::Error>> {
+        // should read from database
+        println!("send_buttons_from_database: channel_id: {}, character_id: {}", channel_id, character_id);
+        Ok((Value::Null))
+    }
+
 }
