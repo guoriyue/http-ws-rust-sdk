@@ -15,6 +15,7 @@ use tungstenite::Message;
 use url::Url;
 use log::{info, error};
 use uuid::Uuid;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub trait Protocol {
     fn serialize(&self, obj: &impl Serialize) -> Result<Vec<u8>, Error>;
@@ -120,10 +121,102 @@ impl<T: Protocol> WebSocket<T> {
         Ok(message)
     }
 
-    pub async fn send_buttons_from_database(&mut self, channel_id: &str, character_id: &str) -> Result<Value, Box<dyn std::error::Error>> {
-        // should read from database
-        println!("send_buttons_from_database: channel_id: {}, character_id: {}", channel_id, character_id);
-        Ok((Value::Null))
+    pub async fn update_buttons(
+        &mut self,
+        service_id: &str,
+        channel_id: &str,
+        buttons: Vec<Value>,
+        recipients: &str
+    ) -> Result<Value, Box<dyn std::error::Error>> {
+
+        let button_dicts: Vec<Value> = buttons.iter().map(|b| b.clone()).collect();
+        let message = json!({
+            "type": "update",
+            "request_id": Uuid::new_v4().to_string(),
+            "service_id": service_id,
+            "body": {
+                "subtype": "update_buttons",
+                "channel_id": channel_id,
+                "recipients": recipients,
+                "content": button_dicts,
+                "group_id": "temp",
+                "context": {}
+            }
+        });
+        
+        self.send(message.clone()).await?;
+        Ok(message)
+    }
+
+    pub async fn message_up(
+        &mut self,
+        user_id: &str,
+        service_id: &str,
+        channel_id: &str,
+        recipients: &[&str],
+        subtype: &str,
+        content: &Value
+    ) -> Result<Value, Box<dyn std::error::Error>> {
+        if recipients.is_empty() {
+            return Ok(json!(null));
+        }
+
+        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
+
+        let message = json!({
+            "type": "message_up",
+            "request_id": Uuid::new_v4().to_string(),
+            "user_id": user_id,
+            "service_id": service_id,
+            "body": {
+                "subtype": subtype,
+                "channel_id": channel_id,
+                "content": content,
+                "recipients": recipients,
+                "timestamp": timestamp,
+                "context": {}
+            }
+        });
+        
+        self.send(message.clone()).await?;
+
+        Ok(message)
+    }
+
+    pub async fn message_down(
+        &mut self,
+        service_id: &str,
+        channel_id: &str,
+        recipients: &str,
+        subtype: &str,
+        content: &str,
+        sender: &str
+    ) -> Result<Value, Box<dyn std::error::Error>> {
+        if recipients.is_empty() {
+            return Ok(json!(null));
+        }
+
+        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
+        
+        let message = json!({
+            "type": "message_down",
+            "request_id": Uuid::new_v4().to_string(),
+            "service_id": service_id,
+            "body": {
+                "subtype": subtype,
+                "channel_id": channel_id,
+                "content": json!({"text": content, "path": content}),
+                "recipients": recipients,
+                "timestamp": timestamp,
+                "sender": sender,
+                "context": {}
+            }
+        });
+
+
+        self.send(message.clone()).await?;
+
+        Ok(message)
     }
 
 }

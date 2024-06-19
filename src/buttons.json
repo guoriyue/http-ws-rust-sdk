@@ -1,0 +1,38 @@
+[
+    {
+        "button_id": "message_btn",
+        "button_name": "Message stuff",
+        "button_text": "Message!",
+        "new_window": true,
+        "arguments": [
+            {
+                "name": "Select Task",
+                "type": "enum",
+                "optional": false,
+                "values": ["Text", "Image"],
+                "placeholder": "(choose)"
+            }
+        ]
+    },
+    {
+        "button_id": "user_btn",
+        "button_name": "user choice",
+        "button_text": "Characters!",
+        "new_window": true,
+        "arguments": [
+            {
+                "name": "Select task",
+                "type": "enum",
+                "optional": false,
+                "values": ["Make Mickey", "Mickey Talk"],
+                "placeholder": "(choose)"
+            }
+        ]
+    },
+    {
+        "button_id": "command_btn",
+        "button_name": "Show Commands",
+        "button_text": "Commands",
+        "new_window": false
+    }
+]

@@ -19,3 +19,12 @@ pub struct Character {
     pub description: String,
     pub character_context: Map<String, Value>, // Using a HashMap to represent arbitrary JSON data
 }
+
+#[derive(Debug)]
+pub struct MessageContent {
+    pub filename: String,
+    pub size: Option<u64>,
+    pub path: String,
+    pub text: Option<String>,
+}
+
